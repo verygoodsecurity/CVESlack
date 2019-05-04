@@ -1,0 +1,19 @@
+# Settings for slack
+slack_username: "CVESlack"
+slack_author: "CVESlack"
+slack_webhook: "https://hooks.slack.com/services/?/?/?"
+
+# Posts every 5 minutes by default
+slack_post_interval: 5
+# slack_emoji_icon: ":lock:"
+
+# Feeds to pull from. Must have "title" and "description" fields set.
+feed_lists:
+  - https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss.xml
+  - http://seclists.org/rss/bugtraq.rss
+
+# The file to pull patterns from
+pattern_file: '.dependencies.txt'
+
+# Should we strip spaces? (may increase false positives)
+strip_spaces: false

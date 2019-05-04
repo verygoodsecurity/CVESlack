@@ -1,0 +1,86 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cveslack
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: cveslack
+  name: cveslack-pv
+  namespace: cveslack
+  annotations:
+    volume.beta.kubernetes.io/storage-class: standard
+    volume.beta.kubernetes.io/storage-provisioner: k8s.io/minikube-hostpath
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: some-image-pull-secret
+  namespace: cveslack
+data:
+  .dockerconfigjson: ?==
+type: kubernetes.io/dockerconfigjson
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cve2slack-config
+  namespace: cveslack
+data:
+  aws-profile-config: |
+    # Settings for slack
+    slack_username: "CVESlack"
+    slack_author: "CVESlack"
+    slack_webhook: "https://hooks.slack.com/services/?/?/?"
+
+    # Posts every 5 minutes by default
+    slack_post_interval: 5
+    # slack_emoji_icon: ":lock:"
+
+    # Feeds to pull from. Must have "title" and "description" fields set.
+    feed_lists:
+      - https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss.xml
+      - http://seclists.org/rss/bugtraq.rss
+
+    # The file to pull patterns from
+    pattern_file: '.dependencies.txt'
+
+    # The file to pull patterns from
+    cache_directory: '/usr/share/cve2slack/cache'
+
+    # Should we strip spaces? (may increase false positives)
+    strip_spaces: false
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cve2slack-job
+  namespace: cveslack
+spec:
+  schedule: "45 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - image: "quay.io/?/cveslack"
+              name: cve2slack-scan
+              volumeMounts:
+                - name: cveslack-cache
+                  mountPath: /usr/share/cve2slack/cache
+          imagePullSecrets:
+            - name: some-image-pull-secret
+          restartPolicy: Never
+          volumes:
+            - name: cveslack-cache
+              persistentVolumeClaim:
+                claimName: cveslack-pv
