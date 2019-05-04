@@ -24,10 +24,10 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: verygoodsecurity-buildzit-pull-secret
+  name: some-pull-secret
   namespace: cveslack
 data:
-  .dockerconfigjson: ewogICJhdXRocyI6IHsKICAgICJxdWF5LmlvIjogewogICAgICAiYXV0aCI6ICJkbVZ5ZVdkdmIyUnpaV04xY21sMGVTdGlkV2xzWkhwcGREcFBSVW8xTkRNeVVVSXhTMU5PTmt0Wk4wUkVXa3N4UlRSR1JVdEpWa1JIVGpSTldUSXlXRlpCVTBGTlRVVklTVTlNTXpaTU1WWklSa05VVFU5UVdreFYiLAogICAgICAiZW1haWwiOiAiIgogICAgfQogIH0KfQ==
+  .dockerconfigjson: ?==
 type: kubernetes.io/dockerconfigjson
 ---
 apiVersion: v1
@@ -40,7 +40,7 @@ data:
     # Settings for slack
     slack_username: "CVESlack"
     slack_author: "CVESlack"
-    slack_webhook: "https://hooks.slack.com/services/***REMOVED***"
+    slack_webhook: "https://hooks.slack.com/services/?/?/?"
 
     # Posts every 5 minutes by default
     slack_post_interval: 5
@@ -72,13 +72,13 @@ spec:
       template:
         spec:
           containers:
-            - image: "quay.io/verygoodsecurity/cveslack"
+            - image: "quay.io/?/cveslack"
               name: cve2slack-scan
               volumeMounts:
                 - name: cveslack-cache
                   mountPath: /usr/share/cve2slack/cache
           imagePullSecrets:
-            - name: verygoodsecurity-buildzit-pull-secret
+            - name: some-pull-secret
           restartPolicy: Never
           volumes:
             - name: cveslack-cache
